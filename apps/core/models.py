@@ -15,7 +15,7 @@ class Evento(models.Model):
 
 
 class SectorEntrada(models.Model):
-    evento_id = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='sectores')
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='sectores')
     nombre_sector = models.CharField(max_length=100)
     capacidad_maxima = models.IntegerField()
     entradas_vendidas = models.IntegerField(default=0)
