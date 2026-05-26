@@ -7,7 +7,7 @@ class Evento(models.Model):
     artista_principal = models.CharField(max_length=150)
     spotify_art_id = models.CharField(max_length=100)
     bkp_spotify_popularity = models.IntegerField(default=0)
-    fecha = models.DateField()
+    fecha = models.DateField(default=None)
     lugar = models.CharField(max_length=150)
 
     def __str__(self):
@@ -27,7 +27,7 @@ class SectorEntrada(models.Model):
 
 class Ticket(models.Model):
     usuario_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tickets')
-    sector_entrada_id = models.ForeignKey('SectorEntrada', on_delete=models.CASCADE, related_name= 'tickets')
+    sector_entrada_id = models.ForeignKey('SectorEntrada', on_delete=models.CASCADE, default= None,  related_name= 'tickets')
     cantidad = models.IntegerField()
     precio_final_ars = models.DecimalField(max_digits=12, decimal_places=2)
     bkp_precio_USD = models.DecimalField(max_digits=12, decimal_places=2)
