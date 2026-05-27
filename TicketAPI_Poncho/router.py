@@ -1,5 +1,6 @@
 from rest_framework import routers
 from apps.core.views import EventoViewSet, SectorEntradaViewSet, TicketViewSet
+from apps.usuario.views import UsuarioViewSet
 from django.urls import path, include
 
 router = routers.DefaultRouter()
@@ -15,6 +16,7 @@ router.register(prefix= 'evento', viewset= EventoViewSet)
 # "prefix" se refiere al nombre con el que buscar, en la url, la API CRUD del viewSet que le pasamos por "viewset"
 router.register(prefix= 'sectorEntrada', viewset= SectorEntradaViewSet)
 router.register(prefix= 'ticket', viewset= TicketViewSet)
+router.register(prefix= 'usuario', viewset= UsuarioViewSet)
 
 urlpatterns = router.urls
 

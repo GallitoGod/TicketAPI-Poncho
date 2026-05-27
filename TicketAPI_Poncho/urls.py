@@ -22,7 +22,7 @@ from django.views.static import serve # Esto sirve imagenes directamente
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('core/', include(router.urls)),
+    path('index/', include(router.urls)),
     path('', TemplateView.as_view(template_name= 'ERS.html'), name= 'ers_doc'),
     path('images/<path:path>', serve, {'document_root': 'templates/images/'}),
     #   Basicamente esto hace una vista generica porque django solo procesa urls como funciones
