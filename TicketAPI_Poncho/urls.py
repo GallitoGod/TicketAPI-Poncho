@@ -15,8 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.views.generic import TemplateView
+from .router import router
+from django.views.static import serve # Esto sirve imagenes directamente
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('core/', include(router.urls)),
+    path('', TemplateView.as_view(template_name= 'ERS.html'), name= 'ers_doc'),
+    path('images/<path:path>', serve, {'document_root': 'templates/images/'}),
+    #   Basicamente esto hace una vista generica porque django solo procesa urls como funciones
+    # y ahi le estoy pasando un html que en caso de hacer la peticion GET, TemplateView va a generar un HttpResponse 
+    # mandandome el HTML directamente sin tener que agregarlo a un script view, deja el codigo mas limpio vaya.
 ]
