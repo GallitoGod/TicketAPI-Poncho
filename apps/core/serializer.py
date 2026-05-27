@@ -28,10 +28,13 @@ class SectorEntradaSerializer(serializers.ModelSerializer):
 class TicketSerializer (serializers.ModelSerializer):
 
     class Meta:
-        model = SectorEntrada
+        model = Ticket
         fields = [
-            'id', 'usuario', 'sector_entrada',
+            'id','usuario', 'sector_entrada',
             'cantidad', 'precio_final_ars',
             'bkp_precio_USD', 'fecha_transaccion',
         ]
-        read_only_fields = ['id']
+        read_only_fields = [
+            'id', 'bkp_precio_USD', 'fecha_transaccion', 
+            'cantidad', 'precio_final_ars'
+        ]

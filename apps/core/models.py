@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from apps.usuario.models import Usuario
 
 class Evento(models.Model):
     nombre = models.CharField(max_length=150)
@@ -26,8 +27,8 @@ class SectorEntrada(models.Model):
 
 
 class Ticket(models.Model):
-    usuario_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tickets')
-    sector_entrada_id = models.ForeignKey('SectorEntrada', on_delete=models.CASCADE, default= None,  related_name= 'tickets')
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='tickets')
+    sector_entrada = models.ForeignKey(SectorEntrada, on_delete=models.CASCADE, default= None,  related_name= 'tickets')
     cantidad = models.IntegerField()
     precio_final_ars = models.DecimalField(max_digits=12, decimal_places=2)
     bkp_precio_USD = models.DecimalField(max_digits=12, decimal_places=2)
