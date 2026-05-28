@@ -62,3 +62,29 @@ class TicketSerializer (serializers.ModelSerializer):
             'uuid', 'bkp_precio_USD', 'fecha_transaccion', 
             'cantidad', 'precio_final_ars'
         ]
+    
+    def validate_cantidad(self, value):
+        """  Control de sobreventa RNF-02:
+            El objetivo de este validator es asegurar que no se pueda comprar mas de 4
+        entradas en una misma transaccion o comprar valores menores iguales a 0.
+        """
+        if value <= 0:
+            raise serializers.ValidationError("La cantidad de entradas debe ser mayor a cero.")
+        if value > 4:
+            raise serializers.ValidationError("No es posible comprar mas de 4 entradas por ticket.") # 
+        return value
+    
+    def validate(self, data):
+        sector = data['sector_entrada'] 
+        cantidad = data['cantidad'] 
+        """   Comprobar datos cruzados entre modelos RNF-01:
+            El objetivo de este validator es es comprobar si es posible hacer la transaccion con
+        respecto a la cantidad de 'asientos' que quedan disponibles en el sector que se quiere
+        comprar la/s entrada/s.
+        """
+        asientos_disponibles = sector.capacidad_maxima - sector.entradas_vendidas 
+        if cantidad > asientos_disponibles:
+            raise serializers.ValidationError({
+                "cantidad": f"No hay suficiente espacio. Asientos disponibles: {asientos_disponibles}."
+            })
+        return data
