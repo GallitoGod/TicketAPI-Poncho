@@ -25,3 +25,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
             if rol_solicitante not in ['Soporte']:
                 raise serializers.ValidationError("No tienes permisos para modificar roles.")
         return value
+    
+    #No se puede tener mismo username
+    #Contraseña no vacia y con 8 caracteres minimos
