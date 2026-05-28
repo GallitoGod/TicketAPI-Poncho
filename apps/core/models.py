@@ -1,7 +1,10 @@
 from django.db import models
 from django.conf import settings
+from apps.usuario.models import Usuario
+import uuid
 
 class Evento(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField()
     artista_principal = models.CharField(max_length=150)
@@ -15,7 +18,8 @@ class Evento(models.Model):
 
 
 class SectorEntrada(models.Model):
-    evento_id = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='sectores')
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='sectores')
     nombre_sector = models.CharField(max_length=100)
     capacidad_maxima = models.IntegerField()
     entradas_vendidas = models.IntegerField(default=0)
@@ -26,12 +30,13 @@ class SectorEntrada(models.Model):
 
 
 class Ticket(models.Model):
-    usuario_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tickets')
-    sector_entrada_id = models.ForeignKey('SectorEntrada', on_delete=models.CASCADE, default= None,  related_name= 'tickets')
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='tickets')
+    sector_entrada = models.ForeignKey(SectorEntrada, on_delete=models.CASCADE, default= None,  related_name= 'tickets')
     cantidad = models.IntegerField()
     precio_final_ars = models.DecimalField(max_digits=12, decimal_places=2)
     bkp_precio_USD = models.DecimalField(max_digits=12, decimal_places=2)
     fecha_transaccion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Ticket {self.id} - {self.usuario}"
+        return f"Ticket {self.uuid} - {self.usuario}"
