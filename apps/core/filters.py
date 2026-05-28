@@ -11,7 +11,6 @@ class EventoFilter(django_filters.FilterSet):
 
     class Meta:
         model = Evento
-        # Definimos qué campos exactos permitimos filtrar
         fields = ['fecha', 'lugar'] 
 
 class SectorEntradaFilter(django_filters.FilterSet):

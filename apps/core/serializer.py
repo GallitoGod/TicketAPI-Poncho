@@ -16,10 +16,10 @@ class EventoSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['uuid', 'spotify_art_id', 'bkp_spotify_popularity']
 
-    def validate_fecha_hora(self, value):
+    def validate_fecha(self, value):
         # Control de tiempo para la cartelera RF-01
-        if value < timezone.now():
-            raise serializers.ValidationError("La fecha y hora del evento debe ser una fecha futura.")
+        if value < timezone.now().date():
+            raise serializers.ValidationError("La fecha del evento debe ser una fecha futura.")
         return value
 
 
@@ -59,9 +59,7 @@ class TicketSerializer (serializers.ModelSerializer):
             'bkp_precio_USD', 'fecha_transaccion',
         ]
         read_only_fields = [
-            'uuid', 'bkp_precio_USD', 'fecha_transaccion', 
-            'cantidad', 'precio_final_ars'
-        ]
+            'uuid', 'bkp_precio_USD', 'fecha_transaccion' , 'precio_final_ars', 'usuario']
     
     def validate_cantidad(self, value):
         """  Control de sobreventa RNF-02:

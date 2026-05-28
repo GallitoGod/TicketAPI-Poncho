@@ -3,6 +3,9 @@ from .models import Usuario
 
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    # email obligatorio
+    email = serializers.EmailField(required=True)
+
     class Meta:
         model = Usuario
         fields = ['uuid', 'username', 'email', 'password', 'rol']
@@ -16,9 +19,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
         if not request or not request.user:
             raise serializers.ValidationError("No se pudo verificar la identidad para validar el rol.")
 
-        """  Validacion para la modificacion de roles RF-03
-            Los unicos que pueden modificar roles en el sistema son los soportes.
-        """
+        # Validacion para la modificacion de roles RF-03
+        
         if self.instance and self.instance.rol != value:
             # Solo los perfiles de Soporte pueden alterar el campo de rol
             rol_solicitante = getattr(request.user, 'rol', 'Comprador')
@@ -26,5 +28,13 @@ class UsuarioSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("No tienes permisos para modificar roles.")
         return value
     
-    #No se puede tener mismo username
-    #Contraseña no vacia y con 8 caracteres minimos
+
+    def validate_email(self, value):
+        # Comprobando que el email no existe:
+        if not self.instance and Usuario.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Este correo electrónico ya está registrado.")
+        return value
+    
+   
+
+    
