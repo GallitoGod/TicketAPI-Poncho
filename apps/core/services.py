@@ -1,6 +1,6 @@
 import requests # Esta libreria basicamente le permite a python que actue como un cliente 
 # y pueda pedirle datos a otros servicios. 
-from .models import Ticket
+from .models import Ticket, Evento
 from rest_framework.exceptions import APIException
 """
     APIException es la clase de manejo de errores de Django Rest Framework, 
@@ -70,12 +70,36 @@ def cotizacion_dolar():
         # dolarAPI esta caido, es el peor caso posible y por eso se deberia esperar a volver a tener comunicacion con la API.
         
 
+"""
+    Esta API de abajo sufrio varios cambios desde la idea incial. Resulta que ahora Spotify, para utilizar su API, pide ser
+un usuario premium y ya no trae un indice de popularidad, por lo que nos vemos obligados a ir por otro medio. 
+    Existe una API llamada Last.fm. La cual a traves de un endpoint publico llamado 'artist.getInfo', pasandole el 
+nombre del artista, devuelve un JSON con dos datos utiles: stats.listeners y stats.playcount. El problema es que no es una escala
+de popularidad comoda como la de Spotify, daba un numero del 0 al 100 lo que facilitaba todo, esta API da numeros inmensos.
+    Por dar un ejemplo, ACDC da 40000000 de oyentes mientras que un aritista de folclore quizas da 15000.
+    Lo que quiere decir que si no mastico un poco estos numeros puedo romper el motor de precios con la idea inicial, entonces:
+
+    IDEA DE CONSUMO, USO DE DATOS Y DEFENSA DEL DETERMINISMO:
+    Basandome en lo que aprendi del libro "Aprende Machine Learning con Scikit-Learn, Keras y TensorFlow" voy a fundamentar
+porque no utilizar machine learning en este caso especifico y porque optar por un algoritmo determinista logaritmico:
+
+    La idea de un algoritmo estocastico como lo puede ser un modelo de regresion cualquiera o arboles de decisiones, necesariamente
+utiliza datos historicos, los cuales no tenemos, para hacer predicciones probabilisticas. Entonces esa idea queda descartada, quedando
+la idea de algoritmos deterministas. El problema, como escribi arriba, son los datos. Estos vienen en uan distribucion de potencias, 
+donde el 1% de los artistas tienen el 90% de las reproducciones (no quiero eso para el motor). Entonces, utilizando la recomendacion
+del libro, vamos a manejar estas caracteristicas don distribuciones de cola larga aplicandole una escala logaritmica.
+    Basicamente comprimimos valores inmensos, por lo que la distancia entre 1000 y 10000 oyentes es la misma a la que
+hay entre 1000000 y 10000000 oyentes. Equilibrando los valores para que pueda andar el motor de precios dinamicos.
+"""
+
+
 def popularidad_artista(evento_id):
     """
-        Esto cumple con el RNF-04, para no llamar todo el tiempo la API de Spotify.
+        Esto cumple con el RNF-04, para no llamar todo el tiempo la API de last.fm.
+        Tambien cumple con el RNF-03 guardando un backup del ultimo dato de popularidad del artista.
     """
     try: 
-        pass
+        evento = Evento.objects.get(id= evento_id)
 
     except requests.RequestException:
         pass
