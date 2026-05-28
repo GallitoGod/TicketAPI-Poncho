@@ -4,7 +4,7 @@ from apps.usuario.models import Usuario
 import uuid
 
 class Evento(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField()
     artista_principal = models.CharField(max_length=150)
@@ -18,7 +18,7 @@ class Evento(models.Model):
 
 
 class SectorEntrada(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='sectores')
     nombre_sector = models.CharField(max_length=100)
     capacidad_maxima = models.IntegerField()
@@ -30,7 +30,7 @@ class SectorEntrada(models.Model):
 
 
 class Ticket(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='tickets')
     sector_entrada = models.ForeignKey(SectorEntrada, on_delete=models.CASCADE, default= None,  related_name= 'tickets')
     cantidad = models.IntegerField()
@@ -39,4 +39,4 @@ class Ticket(models.Model):
     fecha_transaccion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Ticket {self.id} - {self.usuario}"
+        return f"Ticket {self.uuid} - {self.usuario}"
