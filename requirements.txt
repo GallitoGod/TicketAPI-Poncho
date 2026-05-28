@@ -8,3 +8,4 @@ scipy
 matplotlib
 numpy
 pandas
+drf-spectacular

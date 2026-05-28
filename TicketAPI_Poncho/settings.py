@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "drf_spectacular",
     "django_filters",
     "rest_framework",
     "rest_framework_simplejwt",
@@ -56,6 +57,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'apps.core.pagination.CustomPagination',
     'PAGE_SIZE': 10,
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 MIDDLEWARE = [
@@ -144,4 +147,12 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1), 
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'USER_ID_FIELD': 'uuid',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'TicketAPI Poncho',
+    'DESCRIPTION': 'API REST para la gestión de eventos, sectores y venta de entradas de la Fiesta del Poncho.',
+    'VERSION': '2.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True
 }

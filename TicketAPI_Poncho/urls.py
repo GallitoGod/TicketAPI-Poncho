@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 from .router import router
 from django.views.static import serve # Esto sirve imagenes directamente
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -19,4 +20,16 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     path('api-auth/', include('rest_framework.urls')), # Para poder loguear un usuario mediante la interfaz de Browsable API
+
+    # Endpoints para la documentación
+    
+    # Genera el archivo YAML/JSON
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    
+    # Interfaz Swagger
+    path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    
+    # Interfaz ReDoc
+    path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
 ]
