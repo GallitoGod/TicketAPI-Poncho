@@ -2,6 +2,7 @@ import requests # Esta libreria basicamente le permite a python que actue como u
 # y pueda pedirle datos a otros servicios. 
 from .models import Ticket, Evento
 from rest_framework.exceptions import APIException
+import urllib.parse
 """
     APIException es la clase de manejo de errores de Django Rest Framework, 
 es mas que nada para que no explote el servidor dandome un error 500, por lo que
@@ -68,38 +69,52 @@ def cotizacion_dolar():
         return ServicioCotizacionCaido_SinRegistros()
         #   Esto pasa solo cuando la base de datos no tiene registro de ultimas transacciones y al mismo tiempo
         # dolarAPI esta caido, es el peor caso posible y por eso se deberia esperar a volver a tener comunicacion con la API.
-        
-
-"""
-    Esta API de abajo sufrio varios cambios desde la idea incial. Resulta que ahora Spotify, para utilizar su API, pide ser
-un usuario premium y ya no trae un indice de popularidad, por lo que nos vemos obligados a ir por otro medio. 
-    Existe una API llamada Last.fm. La cual a traves de un endpoint publico llamado 'artist.getInfo', pasandole el 
-nombre del artista, devuelve un JSON con dos datos utiles: stats.listeners y stats.playcount. El problema es que no es una escala
-de popularidad comoda como la de Spotify, daba un numero del 0 al 100 lo que facilitaba todo, esta API da numeros inmensos.
-    Por dar un ejemplo, ACDC da 40000000 de oyentes mientras que un aritista de folclore quizas da 15000.
-    Lo que quiere decir que si no mastico un poco estos numeros puedo romper el motor de precios con la idea inicial, entonces:
-
-    IDEA DE CONSUMO, USO DE DATOS Y DEFENSA DEL DETERMINISMO:
-    Basandome en lo que aprendi del libro "Aprende Machine Learning con Scikit-Learn, Keras y TensorFlow" voy a fundamentar
-porque no utilizar machine learning en este caso especifico y porque optar por un algoritmo determinista logaritmico:
-
-    La idea de un algoritmo estocastico como lo puede ser un modelo de regresion cualquiera o arboles de decisiones, necesariamente
-utiliza datos historicos, los cuales no tenemos, para hacer predicciones probabilisticas. Entonces esa idea queda descartada, quedando
-la idea de algoritmos deterministas. El problema, como escribi arriba, son los datos. Estos vienen en uan distribucion de potencias, 
-donde el 1% de los artistas tienen el 90% de las reproducciones (no quiero eso para el motor). Entonces, utilizando la recomendacion
-del libro, vamos a manejar estas caracteristicas don distribuciones de cola larga aplicandole una escala logaritmica.
-    Basicamente comprimimos valores inmensos, por lo que la distancia entre 1000 y 10000 oyentes es la misma a la que
-hay entre 1000000 y 10000000 oyentes. Equilibrando los valores para que pueda andar el motor de precios dinamicos.
-"""
 
 
-def popularidad_artista(evento_id):
+
+# API key	    5832f64f725bdc55ec55b8f083929bb6
+# Shared secret	3fb747ec1b27c04adaaafbef54042bf2
+# Registered to	gallitoGod_1
+def oyentes_artista(evento_id):
+    api_key = '5832f64f725bdc55ec55b8f083929bb6'
     """
         Esto cumple con el RNF-04, para no llamar todo el tiempo la API de last.fm.
         Tambien cumple con el RNF-03 guardando un backup del ultimo dato de popularidad del artista.
+
+        El JSON que devuelve Last.fm para artist.getinfo tiene esta estructura:
+            {
+                "artist": {
+                    "name": "Cher",
+                    "stats": {
+                        "listeners": "123456",
+                        "playcount": "9876543"
+                    },
+                    "tags": { ... },
+                    "bio": { ... }
+                }
+            }
+        Donde solo interesan los valores dentro de 'stats'.
     """
     try: 
         evento = Evento.objects.get(id= evento_id)
+        if evento.artista_principal:
+
+            nombre_seguro = urllib.parse.quote(evento.artista_principal)
+            # Esto convierte espacios o caracteres raros en formato URL seguro
+
+            url = f"http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={nombre_seguro}&api_key={api_key}&format=json&autocorrect=1"
+            # Last.fm tiene una funcion para corregir nombres mal tipeados simplemente poniendo en la URL "autocorrect=1"
+            # Si alguien escribe "GUNS N ROSES", la propia api lo cambiaria a "GUNS N' ROSES", tambien funciona con tildes.
+
+            respuesta = requests.get(url, timeout= 3)
+            respuesta.raise_for_status()
+            datos = respuesta.json()
+            oyentes = datos.get('artist', {}).get('stats', {}).get('listeners')
+            
+            return oyentes
+        
+        else: 
+            raise requests.RequestException()
 
     except requests.RequestException:
         pass
