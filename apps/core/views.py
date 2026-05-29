@@ -54,13 +54,13 @@ class SectorEntradaViewSet(viewsets.ModelViewSet):
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
-    permission_classes = [permissions.IsAuthenticated]     # Solo los usuarios con token válido pueden entrar acá
+    permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'uuid'
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     ordering_fields = ['fecha_transaccion', 'precio_final_ars']
     filterset_class = TicketFilter
 
-    # Esto es para que se asigne el ticket solo al usuario del token
+    
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 

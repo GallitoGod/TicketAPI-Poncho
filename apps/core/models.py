@@ -39,4 +39,4 @@ class Ticket(models.Model):
     fecha_transaccion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Ticket {self.uuid} - {self.usuario}"
+        return f"Ticket {self.usuario} - {self.sector_entrada}"
