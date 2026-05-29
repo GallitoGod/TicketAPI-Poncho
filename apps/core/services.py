@@ -75,7 +75,7 @@ def cotizacion_dolar():
 # API key	    5832f64f725bdc55ec55b8f083929bb6
 # Shared secret	3fb747ec1b27c04adaaafbef54042bf2
 # Registered to	gallitoGod_1
-def oyentes_artista(evento_id):
+def oyentes_artista(artista):
     api_key = '5832f64f725bdc55ec55b8f083929bb6'
     """
         Esto cumple con el RNF-04, para no llamar todo el tiempo la API de last.fm.
@@ -96,25 +96,20 @@ def oyentes_artista(evento_id):
         Donde solo interesan los valores dentro de 'stats'.
     """
     try: 
-        evento = Evento.objects.get(id= evento_id)
-        if evento.artista_principal:
+        nombre_seguro = urllib.parse.quote(artista)
+        # Esto convierte espacios o caracteres raros en formato URL seguro
 
-            nombre_seguro = urllib.parse.quote(evento.artista_principal)
-            # Esto convierte espacios o caracteres raros en formato URL seguro
+        url = f"http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={nombre_seguro}&api_key={api_key}&format=json&autocorrect=1"
+        # Last.fm tiene una funcion para corregir nombres mal tipeados simplemente poniendo en la URL "autocorrect=1"
+        # Si alguien escribe "GUNS N ROSES", la propia api lo cambiaria a "GUNS N' ROSES", tambien funciona con tildes.
 
-            url = f"http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={nombre_seguro}&api_key={api_key}&format=json&autocorrect=1"
-            # Last.fm tiene una funcion para corregir nombres mal tipeados simplemente poniendo en la URL "autocorrect=1"
-            # Si alguien escribe "GUNS N ROSES", la propia api lo cambiaria a "GUNS N' ROSES", tambien funciona con tildes.
-
-            respuesta = requests.get(url, timeout= 3)
-            respuesta.raise_for_status()
-            datos = respuesta.json()
-            oyentes = datos.get('artist', {}).get('stats', {}).get('listeners')
+        respuesta = requests.get(url, timeout= 3)
+        respuesta.raise_for_status()
+        datos = respuesta.json()
+        oyentes = datos.get('artist', {}).get('stats', {}).get('listeners')
             
-            return oyentes
-        
-        else: 
-            raise requests.RequestException()
+        return oyentes
+
 
     except requests.RequestException:
         pass
