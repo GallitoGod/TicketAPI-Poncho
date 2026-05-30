@@ -143,7 +143,7 @@ gasto 101 unidades AURA
         snippet = respuesta.json()
 
         if not snippet.get('items'):
-            raise requests.RequestException('coso')
+            raise requests.RequestException()
         
         channel_id = snippet['items'][0]['snippet']['channelId']
 

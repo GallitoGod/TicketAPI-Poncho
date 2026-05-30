@@ -10,14 +10,15 @@ class MotorDinamico:
         self.w2 = w2
         self.w3 = w3
     
-    def coef_popularidad(x):
-        return rankdata(x, method='average') / len(x)
+    def coef_popularidad(x, vistas_globales) -> float:
+        escala_0_1 = rankdata(x, method='average') / len(vistas_globales)
+        return (escala_0_1 + 1)
     
-    def coef_tiempo(x, dias_faltantes, dias_totales_preventa):
+    def coef_tiempo(x, dias_faltantes, dias_totales_preventa) -> float:
         x = max(0, min(1, dias_faltantes / dias_totales_preventa))
         return 1 + ((1 - x) ** 2)
 
-    def coef_escacez(x, entradas_restantes, capacidad_total):
+    def coef_escacez(x, entradas_restantes, capacidad_total) -> float:
         porcentaje_disponible = max(0, min(1, entradas_restantes / capacidad_total))
         return 1 + ((1 - porcentaje_disponible) ** 2)
     
