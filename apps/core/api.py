@@ -1,24 +1,48 @@
 from numpy import np
 from scipy.stats import rankdata
+import pandas as pd
+from django.utils import timezone
 from .models import Evento, SectorEntrada, Ticket
 
 
 class MotorDinamico:
     
-    def __init__(self, w1, w2, w3):
+    def __init__(self, ruta, w1, w2, w3, k_pop= 6):
+        
+        try:
+            self.df_artistas = pd.read_csv(ruta)
+        except FileNotFoundError:
+            raise Exception(f"No se encuentra el archivo .csv en la ruta {ruta}")
+        
+        # Precalcula el valor de desviacion estandar y la mediana
+        log_repros = np.log(self.df_artistas['reproducciones']+1)
+        self.mu_pop = np.median(log_repros)
+        self.sigma_pop = log_repros.std()
+        self.k_pop = k_pop
+
         self.w1 = w1
         self.w2 = w2
         self.w3 = w3
     
-    def coef_popularidad(x, vistas_globales) -> float:
-        escala_0_1 = rankdata(x, method='average') / len(vistas_globales)
-        return (escala_0_1 + 1)
-    
-    def coef_tiempo(x, dias_faltantes, dias_totales_preventa) -> float:
-        x = max(0, min(1, dias_faltantes / dias_totales_preventa))
+    def coef_popularidad(self, reproducciones_artista) -> float:
+        log_x = np.log(reproducciones_artista + 1)
+        z = self.k_pop * (log_x - self.mu_pop) / self.sigma_pop
+        p = 1 / (1 + np.exp(-z))
+        return 1 + p
+
+    def coef_tiempo(self, evento) -> float:
+        hoy = timezone.now()
+        dias_totales = (evento.fecha - evento.preventa).days
+        dias_faltantes = (evento.fecha - hoy).days
+        dias_faltantes = max(0, dias_faltantes)
+        dias_totales = max(0, dias_totales)
+        
+        x = max(0, min(1, dias_faltantes / dias_totales))
         return 1 + ((1 - x) ** 2)
 
-    def coef_escacez(x, entradas_restantes, capacidad_total) -> float:
+    def coef_escacez(self, evento) -> float:
+        
+        
         porcentaje_disponible = max(0, min(1, entradas_restantes / capacidad_total))
         return 1 + ((1 - porcentaje_disponible) ** 2)
     
