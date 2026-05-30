@@ -8,8 +8,8 @@ class Evento(models.Model):
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField()
     artista_principal = models.CharField(max_length=150)
-    spotify_art_id = models.CharField(max_length=100)
-    bkp_spotify_popularity = models.IntegerField(default=0)
+    coeficiente_pop = models.DecimalField(default=0, max_digits= 4, decimal_places= 2)
+    preventa = models.DateField(default=None)
     fecha = models.DateField(default=None)
     lugar = models.CharField(max_length=150)
 

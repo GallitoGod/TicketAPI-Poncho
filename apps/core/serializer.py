@@ -21,6 +21,11 @@ class EventoSerializer(serializers.ModelSerializer):
         if value < timezone.now().date():
             raise serializers.ValidationError("La fecha del evento debe ser una fecha futura.")
         return value
+    
+    def validate_artista_principal(self, value):
+        if not value: 
+            raise serializers.ValidationError("No se puede cargar un evento sin artista principal")
+        return value
 
 
 class SectorEntradaSerializer(serializers.ModelSerializer):

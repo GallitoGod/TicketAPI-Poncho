@@ -2,7 +2,9 @@ import requests # Esta libreria basicamente le permite a python que actue como u
 # y pueda pedirle datos a otros servicios. 
 from .models import Ticket, Evento
 from rest_framework.exceptions import APIException
+from dotenv import load_dotenv
 import urllib.parse
+import os
 """
     APIException es la clase de manejo de errores de Django Rest Framework, 
 es mas que nada para que no explote el servidor dandome un error 500, por lo que
@@ -71,45 +73,93 @@ def cotizacion_dolar():
         # dolarAPI esta caido, es el peor caso posible y por eso se deberia esperar a volver a tener comunicacion con la API.
 
 
-
-# API key	    5832f64f725bdc55ec55b8f083929bb6
-# Shared secret	3fb747ec1b27c04adaaafbef54042bf2
-# Registered to	gallitoGod_1
-def oyentes_artista(artista):
-    api_key = '5832f64f725bdc55ec55b8f083929bb6'
+def obtener_vistas_youtube(artista):
+    load_dotenv()
+    API_KEY = os.getenv('YOUTUBE_API_KEY')
+    if not API_KEY:
+        raise ValueError("NO ANDA LOCOOOOOOOO")
     """
         Esto cumple con el RNF-04, para no llamar todo el tiempo la API de last.fm.
         Tambien cumple con el RNF-03 guardando un backup del ultimo dato de popularidad del artista.
 
-        El JSON que devuelve Last.fm para artist.getinfo tiene esta estructura:
-            {
-                "artist": {
-                    "name": "Cher",
-                    "stats": {
-                        "listeners": "123456",
-                        "playcount": "9876543"
+        El JSON que me devuelve el chistoso de YouTube:
+        {
+            "kind": "youtube#videoListResponse",
+            "etag": "ejemplo_etag_string",
+            "items": [
+                {
+                "kind": "youtube#video",
+                "etag": "ejemplo_etag_item",
+                "id": "VIDEO_ID_AQUI",
+                "snippet": {
+                    "publishedAt": "2023-10-01T12:00:00Z",
+                    "channelId": "CHANNEL_ID_AQUI",
+                    "title": "Título del Video",
+                    "description": "Descripción completa del video...",
+                    "thumbnails": {
+                    "default": { "url": "https://...", "width": 120, "height": 90 },
+                    "medium": { "url": "https://...", "width": 320, "height": 180 },
+                    "high": { "url": "https://...", "width": 480, "height": 360 }
                     },
-                    "tags": { ... },
-                    "bio": { ... }
+                    "channelTitle": "Nombre del Canal",
+                    "tags": ["tag1", "tag2"],
+                    "categoryId": "22"
+                },
+                "statistics": {
+                    "viewCount": "15000",
+                    "likeCount": "1200",
+                    "favoriteCount": "0",
+                    "commentCount": "300"
                 }
+                }
+            ],
+            "pageInfo": {
+                "totalResults": 1,
+                "resultsPerPage": 1
             }
-        Donde solo interesan los valores dentro de 'stats'.
+    }
+        
+    Bien, todo lo que pida va a venir en 'items' es de a donde tengo que sacar todo, 'kind' da el tipo de recurso, 
+    'snippet' me da el canal y 'statics' tiene likes y vistas pero esta parte la tengo que solicitar para que me la traiga.
+
+    Entonces, primero voy a buscar el canal del artista, despues voy a ver las estadisticas del canal, entonces por artista
+gasto 101 unidades AURA
     """
-    try: 
-        nombre_seguro = urllib.parse.quote(artista)
-        # Esto convierte espacios o caracteres raros en formato URL seguro
+    nombre_seguro = urllib.parse.quote(artista)
+    # Esto convierte espacios o caracteres raros en formato URL seguro
 
-        url = f"http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={nombre_seguro}&api_key={api_key}&format=json&autocorrect=1"
-        # Last.fm tiene una funcion para corregir nombres mal tipeados simplemente poniendo en la URL "autocorrect=1"
-        # Si alguien escribe "GUNS N ROSES", la propia api lo cambiaria a "GUNS N' ROSES", tambien funciona con tildes.
+    #El paso 1 era buscar el canal:
+    snippet_url = "https://www.googleapis.com/youtube/v3/search"
+    snippet_parametros = {
+        'part': 'snippet',
+        'q': nombre_seguro,
+        'type': 'channel',
+        'maxResults': 1,
+        'key': API_KEY
+    }
+    try:
 
-        respuesta = requests.get(url, timeout= 3)
-        respuesta.raise_for_status()
-        datos = respuesta.json()
-        oyentes = datos.get('artist', {}).get('stats', {}).get('listeners')
-            
-        return oyentes
+        respuesta = requests.get(snippet_url, params= snippet_parametros)
+        snippet = respuesta.json()
 
+        if not snippet.get('items'):
+            raise requests.RequestException('coso')
+        
+        channel_id = snippet['items'][0]['snippet']['channelId']
+
+        # Viene el paso dos loco: las estadisticas
+        stats_url = "https://www.googleapis.com/youtube/v3/channels"
+        stats_parametros = {
+            'part': 'statistics',
+            'id': channel_id,
+            'key': API_KEY
+        }
+
+        stats = requests.get(stats_url, stats_parametros)
+        stats_data = stats.json()
+        vistas_totales = stats_data['items'][0]['statistics']['viewCount']
+        return int(vistas_totales)
+  
 
     except requests.RequestException:
-        pass
+        return None

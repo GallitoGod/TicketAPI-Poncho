@@ -5,6 +5,8 @@ from apps.core.permissions import EsProductorOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import EventoFilter, SectorEntradaFilter, TicketFilter
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from .services import obtener_vistas_youtube
+from rest_framework.exceptions import ValidationError
 
 
 @extend_schema_view(
@@ -24,6 +26,15 @@ class EventoViewSet(viewsets.ModelViewSet):
     search_fields = ['nombre', 'artista_principal', 'descripcion']
     ordering_fields = ['fecha', 'nombre']
     filterset_class = EventoFilter
+
+    def perform_create(self, serializer):
+        artista_principal = serializer.validated_data.get('artista_principal')
+        coeficiente = obtener_vistas_youtube(artista_principal)
+        if coeficiente is not None:
+            serializer.save(bkp_coeficiente_pop= coeficiente)
+        else: raise ValidationError({
+            "bkp_coeficiente_pop": "El nombre del artista no cioncide con su canal de YouTube."
+        })
 
 @extend_schema_view(
     list=extend_schema(summary="Listar Sectores", description="Obtiene todos los sectores de los eventos.", tags=['Sectores']),
