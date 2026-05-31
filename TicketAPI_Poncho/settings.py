@@ -154,5 +154,24 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API REST para la gestión de eventos, sectores y venta de entradas de la Fiesta del Poncho.',
     'VERSION': '2.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True
+    'COMPONENT_SPLIT_REQUEST': True,
+
+    'REDOC_UI_SETTINGS': {
+        'theme': {
+            'colors': {
+                'primary': {
+                    'main': '#902020'
+                }
+            },
+            'typography': {
+                'fontFamily': 'Roboto, sans-serif',
+                'headings': {
+                    'fontFamily': 'Montserrat, sans-serif'
+                }
+            }
+        },
+        'expandResponses': '200,201',
+        'hideHostname': False, 
+        'hideDownloadButton': False,
+    },
 }
