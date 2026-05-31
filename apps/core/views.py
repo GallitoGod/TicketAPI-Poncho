@@ -3,10 +3,17 @@ from .models import Evento, SectorEntrada, Ticket
 from apps.core.serializer import EventoSerializer, SectorEntradaSerializer, TicketSerializer
 from apps.core.permissions import EsProductorOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import F
 from .filters import EventoFilter, SectorEntradaFilter, TicketFilter
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from .services import obtener_vistas_youtube
 from rest_framework.exceptions import ValidationError
+from .api import MotorDinamico
+
+motor = MotorDinamico(
+        ruta= 'micro_universo_artistas.csv', 
+        w1= 10000, w2= 2500, w3= 2500
+    )
 
 
 @extend_schema_view(
@@ -88,7 +95,19 @@ class TicketViewSet(viewsets.ModelViewSet):
     ordering_fields = ['fecha_transaccion', 'precio_final_ars']
     filterset_class = TicketFilter
 
+    http_method_names = ['get', 'post', 'delete', 'head', 'options']
+    # Y asi de facil ya no puede editar, quite put y patch
     
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        sector = serializer.validated_data.get('sector_entrada')
+        evento = serializer.validated_data.get('evento')
+        cantidad = serializer.validated_data.get('cantidad')
 
+        precio_unitario = motor.cotizar_ticket(evento, sector)
+        precio_final = precio_unitario * cantidad
+        serializer.save(
+                usuario= self.request.user,
+                precio_final_ars= precio_final
+            )
+        sector.entradas_vendidas = F('entradas_vendidas') + cantidad
+        sector.save(update_fields= ['entradas_vendidas'])
