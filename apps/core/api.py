@@ -1,8 +1,8 @@
-from numpy import np
-from scipy.stats import rankdata
+import numpy as np
 import pandas as pd
 from django.utils import timezone
-from .models import Evento, SectorEntrada, Ticket
+from django.db.models import Sum
+from .services import obtener_vistas_youtube
 
 
 class MotorDinamico:
@@ -28,25 +28,46 @@ class MotorDinamico:
         log_x = np.log(reproducciones_artista + 1)
         z = self.k_pop * (log_x - self.mu_pop) / self.sigma_pop
         p = 1 / (1 + np.exp(-z))
-        return 1 + p
+        return p
 
     def coef_tiempo(self, evento) -> float:
         hoy = timezone.now()
         dias_totales = (evento.fecha - evento.preventa).days
         dias_faltantes = (evento.fecha - hoy).days
         dias_faltantes = max(0, dias_faltantes)
-        dias_totales = max(0, dias_totales)
+        dias_totales = max(1, dias_totales)
         
         x = max(0, min(1, dias_faltantes / dias_totales))
-        return 1 + ((1 - x) ** 2)
+        return (1 - x) ** 2
 
     def coef_escacez(self, evento) -> float:
-        
-        
-        porcentaje_disponible = max(0, min(1, entradas_restantes / capacidad_total))
-        return 1 + ((1 - porcentaje_disponible) ** 2)
+        totales = evento.sectorentrada_set.aggregate(
+            capacidad = Sum('capacidad_total'),
+            vendidas = Sum('entradas_vendidas')
+        )
+
+        capacidad = totales['capacidad'] or 1
+        vendidas = totales['vendidas'] or 0
+        restante = capacidad - vendidas
+
+        porcentaje_disponible = max(0, min(1, restante / capacidad))
+        return (1 - porcentaje_disponible) ** 2
     
+    def cotizar_ticket(self, evento):
+        reproducciones = evento.bkp_reproducciones
+        sectores = evento.sectorentrada_set.all()
 
+        c_pop = self.coef_popularidad(reproducciones)
+        c_dias = self.coef_tiempo(evento)
+        c_escacez = self.coef_escacez(evento)
 
-def calculo_precio():
-    pass
+        precios_finales = []
+        for sector in sectores:
+    
+            precio_f = sector.precio_base_ars + (self.w1 * c_pop) + (self.w2 * c_dias) + (self.w3 * c_escacez)
+            precios_finales.append({
+                'sector': sector, 
+                'precio_ticket': precio_f
+            })
+    
+        return precios_finales

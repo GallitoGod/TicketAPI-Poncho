@@ -29,12 +29,29 @@ class EventoViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         artista_principal = serializer.validated_data.get('artista_principal')
-        coeficiente = obtener_vistas_youtube(artista_principal)
-        if coeficiente is not None:
-            serializer.save(bkp_coeficiente_pop= coeficiente)
+        reproducciones = obtener_vistas_youtube(artista_principal)
+        if reproducciones is not None:
+            serializer.save(bkp_reproducciones= reproducciones)
         else: raise ValidationError({
-            "bkp_coeficiente_pop": "El nombre del artista no cioncide con su canal de YouTube."
+            "artista_principal": "El nombre del artista no cioncide con su canal de YouTube."
         })
+
+    def perform_update(self, serializer):
+        if 'artista_principal' in serializer.validated_data:
+            nuevo_artista = serializer.validated_data.get('artista_principal')
+            artista_viejo = self.get_object().artista_principal
+            if nuevo_artista != artista_viejo:
+                reproducciones = obtener_vistas_youtube(nuevo_artista)
+
+                if reproducciones is not None:
+                    serializer.save(bkp_reproducciones= reproducciones)
+                
+                else:
+                    raise ValidationError({
+                        'artista_principal': 'El nombre del artista no cioncide con su canal de YouTube.'
+                    })
+                return
+        serializer.save()
 
 @extend_schema_view(
     list=extend_schema(summary="Listar Sectores", description="Obtiene todos los sectores de los eventos.", tags=['Sectores']),

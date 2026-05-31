@@ -11,10 +11,10 @@ class EventoSerializer(serializers.ModelSerializer):
         model = Evento
         fields = [
             'uuid', 'nombre', 'descripcion', 
-            'artista_principal', 'spotify_art_id',
-            'bkp_spotify_popularity', 'fecha', 'lugar',
+            'artista_principal', 'bkp_reproducciones',
+            'preventa', 'fecha', 'lugar'
         ]
-        read_only_fields = ['uuid', 'spotify_art_id', 'bkp_spotify_popularity']
+        read_only_fields = ['uuid', 'bkp_reproducciones']
 
     def validate_fecha(self, value):
         # Control de tiempo para la cartelera RF-01
@@ -65,6 +65,8 @@ class TicketSerializer (serializers.ModelSerializer):
         ]
         read_only_fields = [
             'uuid', 'bkp_precio_USD', 'fecha_transaccion' , 'precio_final_ars', 'usuario']
+        
+    #   SOLO SE PUEDE TENER UN TICKET POR USUARIO, HACER EL VALIDATE
     
     def validate_cantidad(self, value):
         """  Control de sobreventa RNF-02:
