@@ -13,11 +13,13 @@ class EventoFilter(django_filters.FilterSet):
         model = Evento
         fields = ['fecha', 'lugar'] 
 
+  # Para filtrar sectores dependiendo a el evento al que pertenecen
 class SectorEntradaFilter(django_filters.FilterSet):
     class Meta:
         model = SectorEntrada
         fields = ['evento']
 
+# Permite filtrar tickets por el sector de la entrada
 class TicketFilter(django_filters.FilterSet):
     class Meta:
         model = Ticket
