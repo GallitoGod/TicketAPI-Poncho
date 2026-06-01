@@ -32,6 +32,8 @@ class EventoViewSet(viewsets.ModelViewSet):
     ordering_fields = ['fecha', 'nombre']
     filterset_class = EventoFilter
 
+    # TENGO QUE CONECTAR LOS WEBSOCKTES A ESTE PERFORM_CREATE Y PERFORM_UPDATE
+
     def perform_create(self, serializer):
         artista_principal = serializer.validated_data.get('artista_principal')
         reproducciones = obtener_vistas_youtube(artista_principal)
@@ -96,6 +98,8 @@ class TicketViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'head', 'options']
     # Y asi de facil ya no puede editar, quite put y patch
     
+    # TENGO QUE CONECTAR LOS WEBSOCKETS A ESTE PERFORM_CREATE
+
     def perform_create(self, serializer):
         sector = serializer.validated_data.get('sector_entrada')
         evento = sector.evento
