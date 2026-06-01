@@ -14,8 +14,9 @@ URL_COMPRA = "http://127.0.0.1:8000/index/ticket/"
 
 SECTORES = [    #la uuid de los cosos
 # no me da la cabeza para hacer esto de una forma mas bonita 
-
-    
+    "fa6f6879-afa2-4017-af4b-b4e97f25f1a2",
+    "53a31445-aa58-45b0-92dd-234d6071afc0",
+    "8e8a00cb-19bd-4d93-a0ff-ec63d460d7c3"
 ]
 
 def ataque_ddods(cantidad_bots=300):
