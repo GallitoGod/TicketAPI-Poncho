@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -88,7 +89,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "TicketAPI_Poncho.wsgi.application"
+#WSGI_APPLICATION = "TicketAPI_Poncho.wsgi.application"
+ASGI_APPLICATION = 'TicketAPI_Poncho.asgi.application'
+#   Esto esta creado por Django para soportar asincronico pero tambien entiende sincronico, 
+# o seq que no rompo nada
 
 
 # Database
@@ -175,3 +179,10 @@ SPECTACULAR_SETTINGS = {
         'hideDownloadButton': False,
     },
 }
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+# Esto es un canal de comunicacion para poder utilziar WebsocketConsumer

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel</title>
+</head>
+<body>
+
+    <h1>Dashboard</h1>
+    <div id="estado-conexion" class="estado">Conectando...</div>
+
+    <div>
+        <div>
+            <h3>Impacto del Motor de Precios</h3>
+            <img id="grafico-impacto" src="" alt="datos..." style="display: none;">
+        </div>
+
+        <div>
+            <h3>Curva Historica</h3>
+            <img id="grafico-historico" src="" alt="datos..." style="display: none;">
+        </div>
+    </div>
+
+    <script>
+        const socket = new WebSocket('ws://127.0.0.1:8000/ws/estadisticas/global/');
+        const estadoDiv = document.getElementById('estado-conexion');
+        socket.onopen = (e) => {
+            estadoDiv.innerHTML = "Conectado al WebSocket";
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.img_impacto_b64) {
+                const imgImpacto = document.getElementById('grafico-impacto');
+                imgImpacto.src = "data:image/png;base64," + data.img_impacto_b64;
+                imgImpacto.style.display = "block";
+            }
+            
+            if (data.img_historico_b64) {
+                const imgHistorico = document.getElementById('grafico-historico');
+                imgHistorico.src = "data:image/png;base64," + data.img_historico_b64;
+                imgHistorico.style.display = "block";
+            }
+        };
+
+        socket.onclose = function(event) {
+            estadoDiv.innerHTML = "Conexion perdida o rechazada";
+        };
+    </script>
+
+</body>
+</html>

@@ -9,6 +9,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from .services import obtener_vistas_youtube
 from rest_framework.exceptions import ValidationError
 from .api import MotorDinamico
+from django.shortcuts import render, get_object_or_404
 
 motor = MotorDinamico(
         ruta= 'micro_universo_artistas.csv', 
@@ -111,3 +112,10 @@ class TicketViewSet(viewsets.ModelViewSet):
             )
         sector.entradas_vendidas = F('entradas_vendidas') + cantidad
         sector.save(update_fields= ['entradas_vendidas'])
+
+def panel_estadisticas(request):
+    return render(request, 'dashboard.html')
+
+def panel_estadisticas_especificas(request, evento_id):
+    evento = get_object_or_404(Evento, pk=evento_id)
+    return render(request, 'dashboard_evento.html', {'evento_id': evento_id, 'evento': evento})
