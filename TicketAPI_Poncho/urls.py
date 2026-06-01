@@ -5,6 +5,7 @@ from .router import router
 from django.views.static import serve # Esto sirve imagenes directamente
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from apps.core import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -31,5 +32,8 @@ urlpatterns = [
     
     # Interfaz ReDoc
     path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    path('dashboard/', views.panel_estadisticas, name='dashboard-estadisticas'),
+    path('dashboard/<uuid:evento_id>', views.panel_estadisticas_especificas, name='dashboard-evento')
 
 ]

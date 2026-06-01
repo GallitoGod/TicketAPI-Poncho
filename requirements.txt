@@ -10,3 +10,5 @@ numpy
 pandas
 drf-spectacular
 dotenv
+channels 
+daphne

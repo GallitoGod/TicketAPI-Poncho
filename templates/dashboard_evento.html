@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ evento.artista_principal }}</title>
+</head>
+<body>
+    
+    <h1>Escacez de sectores: {{ evento.artista_principal }}</h1>
+    <p>Fecha del evento: {{ evento.fecha }} Lugar: {{ evento.lugar }}</p>
+
+    <div id="estado-conexion">Conectando... </div>
+
+    <img id="grafico-sectores" src="" alt="">
+
+    <script>
+        const eventoId =  "{{ evento_id }}"
+        const wsUrl = `ws://${window.location.host}/ws/estadisticas/evento/${eventoId}`
+        const socket = new WebSocket(wsUrl)
+        const estadoDiv = document.getElementById('estado-conexion')
+
+        socket.onopen = e => {
+            estadoDiv.innerHTML = `Conectado`
+        }
+
+        socket.onmessage = event => {
+            const data = JSON.parse(event.data)
+            
+            if (data.imagen_b64) {
+                const imgSectores = document.getElementById('grafico-sectores')
+                imgSectores.src = "data:image/png;base64," + data.imagen_b64
+                imgSectores.style.display = "block"
+            }
+        };
+
+        socket.onclose = event => {
+            estadoDiv.innerHTML = "Conexion perdida o rechazada";
+        };
+
+    </script>
+</body>
+</html>

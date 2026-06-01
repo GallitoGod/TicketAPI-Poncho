@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from django.utils import timezone
 from django.db.models import Sum
-from .services import obtener_vistas_youtube
 
 
 class MotorDinamico:
@@ -53,21 +52,13 @@ class MotorDinamico:
         porcentaje_disponible = max(0, min(1, restante / capacidad))
         return (1 - porcentaje_disponible) ** 2
     
-    def cotizar_ticket(self, evento):
+    def cotizar_ticket(self, evento, sector):
         reproducciones = evento.bkp_reproducciones
-        sectores = evento.sectorentrada_set.all()
 
         c_pop = self.coef_popularidad(reproducciones)
         c_dias = self.coef_tiempo(evento)
         c_escacez = self.coef_escacez(evento)
 
-        precios_finales = []
-        for sector in sectores:
+        precio_f = sector.precio_base_ars + (self.w1 * c_pop) + (self.w2 * c_dias) + (self.w3 * c_escacez)
     
-            precio_f = sector.precio_base_ars + (self.w1 * c_pop) + (self.w2 * c_dias) + (self.w3 * c_escacez)
-            precios_finales.append({
-                'sector': sector, 
-                'precio_ticket': precio_f
-            })
-    
-        return precios_finales
+        return precio_f
