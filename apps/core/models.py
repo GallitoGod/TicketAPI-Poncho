@@ -14,7 +14,7 @@ class Evento(models.Model):
     lugar = models.CharField(max_length=150)
 
     def __str__(self):
-        return f"Evento {self.nombre} fecha: {self.fecha}"
+        return f"Evento {self.nombre}, fecha: {self.fecha}"
 
 
 class SectorEntrada(models.Model):
@@ -26,7 +26,7 @@ class SectorEntrada(models.Model):
     precio_base_ars = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):
-        return f"Sector {self.nombre_sector}"
+        return f"Sector {self.nombre_sector}, {self.evento.nombre}"
 
 
 class Ticket(models.Model):

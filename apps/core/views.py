@@ -1,20 +1,17 @@
 from rest_framework import viewsets, permissions, filters
 from .models import Evento, SectorEntrada, Ticket
 from apps.core.serializer import EventoSerializer, SectorEntradaSerializer, TicketSerializer
-from apps.core.permissions import EsProductorOrReadOnly
+from apps.core.permissions import EsProductor_SoporteOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import F
 from .filters import EventoFilter, SectorEntradaFilter, TicketFilter
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from .services import obtener_vistas_youtube
+from .services import obtener_vistas_youtube, cotizacion_dolar
 from rest_framework.exceptions import ValidationError
 from .api import MotorDinamico
 from django.shortcuts import render, get_object_or_404
 
-motor = MotorDinamico(
-        ruta= 'micro_universo_artistas.csv', 
-        w1= 10000, w2= 2500, w3= 2500
-    )
+motor = MotorDinamico(ruta= 'micro_universo_artistas.csv')
 
 
 @extend_schema_view(
@@ -28,7 +25,7 @@ motor = MotorDinamico(
 class EventoViewSet(viewsets.ModelViewSet):
     queryset = Evento.objects.all()
     serializer_class = EventoSerializer
-    permission_classes = [EsProductorOrReadOnly] 
+    permission_classes = [EsProductor_SoporteOrReadOnly] 
     lookup_field = 'uuid'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'artista_principal', 'descripcion']
@@ -72,7 +69,7 @@ class EventoViewSet(viewsets.ModelViewSet):
 class SectorEntradaViewSet(viewsets.ModelViewSet):
     queryset = SectorEntrada.objects.all()
     serializer_class = SectorEntradaSerializer
-    permission_classes = [EsProductorOrReadOnly]  
+    permission_classes = [EsProductor_SoporteOrReadOnly]  
     lookup_field = 'uuid'
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     ordering_fields = ['precio_base_ars']
@@ -101,14 +98,17 @@ class TicketViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         sector = serializer.validated_data.get('sector_entrada')
-        evento = serializer.validated_data.get('evento')
+        evento = sector.evento
         cantidad = serializer.validated_data.get('cantidad')
+        pr_dolar = cotizacion_dolar()
 
         precio_unitario = motor.cotizar_ticket(evento, sector)
-        precio_final = precio_unitario * cantidad
+        precio_final_ars = precio_unitario * cantidad
+        precio_USD =  precio_final_ars/ pr_dolar
         serializer.save(
                 usuario= self.request.user,
-                precio_final_ars= precio_final
+                precio_final_ars= precio_final_ars,
+                bkp_precio_USD= precio_USD
             )
         sector.entradas_vendidas = F('entradas_vendidas') + cantidad
         sector.save(update_fields= ['entradas_vendidas'])

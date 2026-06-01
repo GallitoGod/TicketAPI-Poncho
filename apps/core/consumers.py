@@ -123,7 +123,7 @@ class GraficoGlobalConsumer(WebsocketConsumer):
 
         df_tickets = pd.DataFrame(list(tickets_or))
         df_tickets = df_tickets.rename(columns={
-            'evento__artista_principal': 'evento', 
+            'sector_entrada__evento__artista_principal': 'evento', 
             'precio_final_ars': 'precio_pagado'
         })
 
