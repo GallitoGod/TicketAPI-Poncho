@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Evento, SectorEntrada, Ticket
 from django.utils import timezone
+from django.db.models import Sum
 
 class EventoSerializer(serializers.ModelSerializer):
     """
@@ -66,7 +67,20 @@ class TicketSerializer (serializers.ModelSerializer):
         read_only_fields = [
             'uuid', 'bkp_precio_USD', 'fecha_transaccion' , 'precio_final_ars', 'usuario']
         
-    #   SOLO SE PUEDE TENER UN TICKET POR USUARIO, HACER EL VALIDATE
+    def validate(self, data):
+        """  Control de sobreventa RNF-02:
+            No permite mas compras de tickest una vez alcanzada la cantidad maxima de entradas.
+        """
+        usuario = data.get('usuario')
+        cantidad = data.get('cantidad')
+        cant_por_ticket = Ticket.objects.filter(usuario= usuario).aggregate(
+            entradas_ya_compradas= Sum('cantidad')
+        )
+        historial_de_compras = cant_por_ticket['entradas_ya_compradas'] or 0
+
+        if historial_de_compras + cantidad > 4:
+            raise serializers.ValidationError("Limite de entradas por usuario excedido")
+        return data
     
     def validate_cantidad(self, value):
         """  Control de sobreventa RNF-02:
@@ -80,8 +94,8 @@ class TicketSerializer (serializers.ModelSerializer):
         return value
     
     def validate(self, data):
-        sector = data['sector_entrada'] 
-        cantidad = data['cantidad'] 
+        sector = data.get('sector_entrada')
+        cantidad = data.get('cantidad') 
         """   Comprobar datos cruzados entre modelos RNF-01:
             El objetivo de este validator es es comprobar si es posible hacer la transaccion con
         respecto a la cantidad de 'asientos' que quedan disponibles en el sector que se quiere

@@ -164,11 +164,10 @@ class GraficoConsumer(WebsocketConsumer):
             llego a el 'evento_id'.
             """
             self.room_name = f'evento_{self.evento_id}'
-            #   Por lo que entendi, estos canales, le llaman abitaciones, se usan para que no
-            # explote nada dentro del codigo de Django, es como una implementacion de seguridad por
-            # estar usando sincronicos y asincronicos en un mismo sistema.
+            #   Estos canales, le llaman habitaciones o grupos, se usan para el cambio de sincronico a asincronico
+            # o viceversa, ya que entre ellos no se entienden.
 
-            async_to_sync(self.channel_layer.group_add)( # Con group_add entro al usuario a la abitacion.
+            async_to_sync(self.channel_layer.group_add)( # Con group_add entro al usuario a la habitacion.
                 self.room_name, # Esto es mio.
                 self.channel_name # Esto es de django.
             )# Esta es la funcion con la que puedo comunicar las APIs REST con esta API

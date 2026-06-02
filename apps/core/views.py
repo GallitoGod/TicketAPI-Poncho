@@ -10,6 +10,8 @@ from .services import obtener_vistas_youtube, cotizacion_dolar
 from rest_framework.exceptions import ValidationError
 from .api import MotorDinamico
 from django.shortcuts import render, get_object_or_404
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 motor = MotorDinamico(ruta= 'micro_universo_artistas.csv')
 
@@ -32,16 +34,26 @@ class EventoViewSet(viewsets.ModelViewSet):
     ordering_fields = ['fecha', 'nombre']
     filterset_class = EventoFilter
 
-    # TENGO QUE CONECTAR LOS WEBSOCKTES A ESTE PERFORM_CREATE Y PERFORM_UPDATE
 
     def perform_create(self, serializer):
         artista_principal = serializer.validated_data.get('artista_principal')
         reproducciones = obtener_vistas_youtube(artista_principal)
         if reproducciones is not None:
-            serializer.save(bkp_reproducciones= reproducciones)
+            evento_creado = serializer.save(bkp_reproducciones= reproducciones)
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                "estadisticas_admin",
+                {"type": "enviar_graficos_globales"}
+            )
+            async_to_sync(channel_layer.group_send)(
+                f"evento_{evento_creado.uuid}",
+                {"type": "enviar_graficos_especificos"}
+            )
         else: raise ValidationError({
             "artista_principal": "El nombre del artista no cioncide con su canal de YouTube."
         })
+        return
 
     def perform_update(self, serializer):
         if 'artista_principal' in serializer.validated_data:
@@ -51,8 +63,17 @@ class EventoViewSet(viewsets.ModelViewSet):
                 reproducciones = obtener_vistas_youtube(nuevo_artista)
 
                 if reproducciones is not None:
-                    serializer.save(bkp_reproducciones= reproducciones)
-                
+                    evento_editado = serializer.save(bkp_reproducciones= reproducciones)
+
+                    channel_layer = get_channel_layer()
+                    async_to_sync(channel_layer.group_send)(
+                        "estadisticas_admin",
+                        {"type": "enviar_graficos_globales"}
+                    )
+                    async_to_sync(channel_layer.group_send)(
+                        f"evento_{evento_editado.uuid}",
+                        {"type": "enviar_graficos_especificos"}
+                    )
                 else:
                     raise ValidationError({
                         'artista_principal': 'El nombre del artista no cioncide con su canal de YouTube.'
@@ -98,7 +119,6 @@ class TicketViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'head', 'options']
     # Y asi de facil ya no puede editar, quite put y patch
     
-    # TENGO QUE CONECTAR LOS WEBSOCKETS A ESTE PERFORM_CREATE
 
     def perform_create(self, serializer):
         sector = serializer.validated_data.get('sector_entrada')
@@ -116,6 +136,17 @@ class TicketViewSet(viewsets.ModelViewSet):
             )
         sector.entradas_vendidas = F('entradas_vendidas') + cantidad
         sector.save(update_fields= ['entradas_vendidas'])
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "estadisticas_admin",
+            {"type": "enviar_graficos_globales"}
+        )
+        async_to_sync(channel_layer.group_send)(
+            f"evento_{evento.uuid}",
+            {"type": "enviar_graficos_especificos"}
+        )
+
+
 
 def panel_estadisticas(request):
     return render(request, 'dashboard.html')
