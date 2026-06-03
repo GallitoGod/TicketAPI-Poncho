@@ -14,9 +14,12 @@ URL_COMPRA = "http://127.0.0.1:8000/index/ticket/"
 
 SECTORES = [    #la uuid de los cosos
 # no me da la cabeza para hacer esto de una forma mas bonita 
-    "fa6f6879-afa2-4017-af4b-b4e97f25f1a2",
-    "53a31445-aa58-45b0-92dd-234d6071afc0",
-    "8e8a00cb-19bd-4d93-a0ff-ec63d460d7c3"
+    "efd5e471-ec9a-40e8-bd88-1f9166c1be47",
+    "8fd5e5ec-4323-4e3c-adb9-1a89abb6020a",
+    "3e1a1873-f47d-4bb3-a600-d05d9f200406",
+    "f499c724-2671-424d-be1f-759da55bea4a",
+    "3739ab72-e8b4-49c1-b9b3-c5a31bc58bf5",
+    "afe9c7da-0b77-43e0-822a-768c59855a46"
 ]
 
 def ataque_ddods(cantidad_bots=300):
@@ -48,7 +51,7 @@ def ataque_ddods(cantidad_bots=300):
         }
         
         requests.post(URL_COMPRA, json=payload, headers=headers)
-        time.sleep(random.uniform(1.0, 4.0))
+        time.sleep(random.uniform(0.5,2.0))
 
 if __name__ == "__main__":
     ataque_ddods()
