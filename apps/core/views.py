@@ -8,7 +8,7 @@ from .filters import EventoFilter, SectorEntradaFilter, TicketFilter
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from .services import obtener_vistas_youtube, cotizacion_dolar
 from rest_framework.exceptions import ValidationError
-from .api import MotorDinamico
+from .engine import MotorDinamico
 from django.shortcuts import render, get_object_or_404
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
