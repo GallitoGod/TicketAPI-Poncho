@@ -34,7 +34,6 @@ class SectorEntradaSerializer(serializers.ModelSerializer):
         Este serializador va a ser utilizado solo por los perfiles productor y soporte
     para la modificacion de capacidades del predio.
     """
-    evento = EventoSerializer()
     class Meta: 
         model = SectorEntrada
         fields = [

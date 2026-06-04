@@ -157,7 +157,7 @@ SIMPLE_JWT = {
 SPECTACULAR_SETTINGS = {
     'TITLE': 'TicketAPI Poncho',
     'DESCRIPTION': 'API REST para la gestión de eventos, sectores y venta de entradas de la Fiesta del Poncho.',
-    'VERSION': '2.0',
+    'VERSION': '4.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
 
