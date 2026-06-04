@@ -42,7 +42,7 @@ def ataque_ddods(cantidad_bots=300):
             continue
             
         token = res_token.json().get('access')
-        headers = {"Authorization": f"Bearer {token}"} # El token va en la cabeza de las peticiones asi (segun chatgpt)
+        headers = {"Authorization": f"Bearer {token}"} # El token va en la cabeza de las peticiones
 
         sector = random.choice(SECTORES)
         payload = {
