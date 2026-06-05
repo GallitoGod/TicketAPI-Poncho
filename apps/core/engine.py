@@ -36,7 +36,7 @@ class MotorDinamico:
         x = max(0, min(1, dias_faltantes / dias_totales))
         return 1 + (1 - x) ** 2
 
-    def coef_escacez(self, evento) -> float:
+    def coef_escasez(self, evento) -> float:
         totales = evento.sectores.aggregate(
             capacidad = Sum('capacidad_maxima'),
             vendidas = Sum('entradas_vendidas')
@@ -54,9 +54,9 @@ class MotorDinamico:
 
         c_pop = self.coef_popularidad(reproducciones)
         c_dias = self.coef_tiempo(evento)
-        c_escacez = self.coef_escacez(evento)
+        c_escasez = self.coef_escasez(evento)
 
         precio_base = float(sector.precio_base_ars)
-        precio_f = precio_base * (.7 + (.1 * c_pop) + (.1 * c_dias) + (.1 * c_escacez))
+        precio_f = precio_base * (.7 + (.1 * c_pop) + (.1 * c_dias) + (.1 * c_escasez))
     
         return precio_f
