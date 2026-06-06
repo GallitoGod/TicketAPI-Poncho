@@ -26,6 +26,8 @@ El sistema requiere Python 3.x y las dependencias enumeradas en requirements.txt
 
 ---
 
+# [Documentacion de especificaciones de requerimientos de software](templates/ERS.html)
+
 ## 1. Autenticacion y Seguridad
 
 Todas las transacciones de compra requieren estar autenticado. El sistema utiliza tokens de acceso.
