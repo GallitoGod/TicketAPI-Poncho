@@ -26,7 +26,7 @@ El sistema requiere Python 3.x y las dependencias enumeradas en requirements.txt
 
 ---
 
-# [Documentacion de especificaciones de requerimientos de software](documentacion/documentacion_motor_dinamico.md)
+# [Documentacion de especificaciones de requerimientos de software](documentacion/Especificacion de requisitos de software TicketAPI Poncho.pdf)
 
 ## 1. Autenticacion y Seguridad
 
