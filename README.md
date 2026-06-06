@@ -26,7 +26,7 @@ El sistema requiere Python 3.x y las dependencias enumeradas en requirements.txt
 
 ---
 
-# [Documentacion de especificaciones de requerimientos de software](templates/ERS.html)
+# [Documentacion de especificaciones de requerimientos de software](documentacion/ERS.pdf)
 
 ## 1. Autenticacion y Seguridad
 
