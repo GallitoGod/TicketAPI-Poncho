@@ -3,6 +3,29 @@ El sistema utiliza Django REST Framework para las operaciones transaccionales cl
 
 ---
 
+## Setup y configuraciones:
+Esta pagina proporciona una guia tecnica completa para configurar el entorno de desarrollo para el proyecto TicketAPI Poncho. Cubre la gestion de dependencias, la configuracion central de Django y la inicializacion de la infraestructura en tiempo real basada en ASGI.
+
+### Inicializacion del entorno
+El proyecto se basa en un conjunto específico de bibliotecas de Python para servicios web, análisis de datos y comunicación en tiempo real.
+
+### Instalacion de dependencias
+El sistema requiere Python 3.x y las dependencias enumeradas en requirements.txt. Los paquetes incluyen:
+* Django & DRF: Core del proyecto y kit de herramientas REST.
+* Channels & Daphne: Soporte asincrono para WebSocket.
+* SimpleJWT: Autenticacion de Token.
+* Data Stack: numpy, pandas, scipy y matplotlib para el motor de precios dinamico y la generacion de graficos en tiempo real.
+
+```bash 
+    pip install -r requirements.txt 
+```
+
+### Fuentes:
+
+[requirements.txt](https://github.com/GallitoGod/TicketAPI-Poncho/blob/84888343e8ee2672d2d49bab196e34ddfc5ee741/requirements.txt#L2-L14)
+
+---
+
 ## 1. Autenticacion y Seguridad
 
 Todas las transacciones de compra requieren estar autenticado. El sistema utiliza tokens de acceso.
