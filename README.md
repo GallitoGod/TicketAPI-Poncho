@@ -67,3 +67,7 @@ Las transacciones de compras de tickets en distintos eventos y sectores pueden s
 
 * Endpoint: `/ws/dashboard/global/`
 * Acceso permitido solo a soporte y produccion.
+
+---
+
+### Para mas documentacion explicando el funcionamiento del sistema: [Documentacion](documentacion/)
