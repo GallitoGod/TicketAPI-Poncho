@@ -71,8 +71,8 @@ class TicketSerializer (serializers.ModelSerializer):
         """  Control de sobreventa RNF-02:
             No permite mas compras de tickest una vez alcanzada la cantidad maxima de entradas.
         """
-        usuario = data.get('usuario')
-        cantidad = data.get('cantidad')
+        usuario = self.context['request'].user
+        cantidad = data.get('cantidad', 0) 
         cant_por_ticket = Ticket.objects.filter(usuario= usuario).aggregate(
             entradas_ya_compradas= Sum('cantidad')
         )
@@ -80,6 +80,19 @@ class TicketSerializer (serializers.ModelSerializer):
 
         if historial_de_compras + cantidad > 4:
             raise serializers.ValidationError("Limite de entradas por usuario excedido")
+        
+
+        sector = data.get('sector_entrada')
+        """   Comprobar datos cruzados entre modelos RNF-01:
+            El objetivo de este validator es es comprobar si es posible hacer la transaccion con
+        respecto a la cantidad de 'asientos' que quedan disponibles en el sector que se quiere
+        comprar la/s entrada/s.
+        """
+        asientos_disponibles = sector.capacidad_maxima - sector.entradas_vendidas 
+        if cantidad > asientos_disponibles:
+            raise serializers.ValidationError({
+                "cantidad": f"No hay suficiente espacio. Asientos disponibles: {asientos_disponibles}."
+            })
         return data
     
     def validate_cantidad(self, value):
@@ -93,17 +106,3 @@ class TicketSerializer (serializers.ModelSerializer):
             raise serializers.ValidationError("No es posible comprar mas de 4 entradas por ticket.") # 
         return value
     
-    def validate(self, data):
-        sector = data.get('sector_entrada')
-        cantidad = data.get('cantidad') 
-        """   Comprobar datos cruzados entre modelos RNF-01:
-            El objetivo de este validator es es comprobar si es posible hacer la transaccion con
-        respecto a la cantidad de 'asientos' que quedan disponibles en el sector que se quiere
-        comprar la/s entrada/s.
-        """
-        asientos_disponibles = sector.capacidad_maxima - sector.entradas_vendidas 
-        if cantidad > asientos_disponibles:
-            raise serializers.ValidationError({
-                "cantidad": f"No hay suficiente espacio. Asientos disponibles: {asientos_disponibles}."
-            })
-        return data
