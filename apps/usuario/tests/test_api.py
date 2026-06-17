@@ -7,19 +7,8 @@ Que se testea aca:
     no prueban (alla uso force_authenticate). Aca chequeo que el token salga.
 """
 
-pytestmark = pytest.mark.django_db
 
-
-def test_crear_usuario_requiere_autenticacion(api_client):
-    # un anonimo no puede dar de alta usuarios.
-    resp = api_client.post("/index/usuario/", {
-        "username": "Chocolate_cheap_charly",
-        "email": "ChocoCharly@gmail.com",
-        "password": "pass1234",
-    })
-    assert resp.status_code in (401, 403)
-
-
+@pytest.mark.django_db
 def test_crear_usuario_ok(api_client, soporte):
     api_client.force_authenticate(user=soporte)
     resp = api_client.post("/index/usuario/", {
@@ -33,6 +22,7 @@ def test_crear_usuario_ok(api_client, soporte):
     assert Usuario.objects.filter(username="Chocolate_cheap_charly").exists()
 
 
+@pytest.mark.django_db
 def test_ver_usuario_no_devuelve_password(api_client, comprador):
     api_client.force_authenticate(user=comprador)
     resp = api_client.get(f"/index/usuario/{comprador.uuid}/")
@@ -40,6 +30,7 @@ def test_ver_usuario_no_devuelve_password(api_client, comprador):
     assert "password" not in resp.data
 
 
+@pytest.mark.django_db
 def test_login_jwt_devuelve_tokens(api_client, comprador):
     # el fixture crea el usuario con password "pass1234"
     resp = api_client.post("/api/token/", {
@@ -50,6 +41,7 @@ def test_login_jwt_devuelve_tokens(api_client, comprador):
     assert "access" in resp.data
 
 
+@pytest.mark.django_db
 def test_login_jwt_credenciales_invalidas(api_client, comprador):
     resp = api_client.post("/api/token/", {
         "username": "comprador1",

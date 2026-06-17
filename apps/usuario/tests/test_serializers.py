@@ -11,8 +11,8 @@ Que se testea aca:
 @pytest.mark.django_db
 def test_registro_valido_pasa():
     s = UsuarioSerializer(data={
-        "username": "nuevo",
-        "email": "nuevo@test.com",
+        "username": "Chocolate_cheap_charly",
+        "email": "Chocolate@gmail.com",
         "password": "pass1234",
     })
     assert s.is_valid(), s.errors
