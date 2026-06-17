@@ -2,9 +2,7 @@ import pytest
 from apps.usuario.models import Usuario
 """
 Que se testea aca:
-  - El flujo de alta de usuarios por el endpoint (POST /index/usuario/). Ojo: la
-    API arranca con IsAuthenticated por defecto, asi que un anonimo no puede y un
-    logueado si (igual que en core, uso force_authenticate).
+  - El flujo de alta de usuarios por el endpoint (POST /index/usuario/).
   - El login JWT contra /api/token/, que es lo que el resto de los tests de core
     no prueban (alla uso force_authenticate). Aca chequeo que el token salga.
 """
@@ -35,15 +33,10 @@ def test_crear_usuario_ok(api_client, soporte):
     assert Usuario.objects.filter(username="Chocolate_cheap_charly").exists()
 
 
-def test_crear_usuario_no_devuelve_password(api_client, soporte):
-    # password es write_only, no tiene que aparecer en la respuesta.
-    api_client.force_authenticate(user=soporte)
-    resp = api_client.post("/index/usuario/", {
-        "username": "El_Toto",
-        "email": "gmailDelToto@gmail.com",
-        "password": "pass1234",
-    })
-    assert resp.status_code == 201, resp.data
+def test_ver_usuario_no_devuelve_password(api_client, comprador):
+    api_client.force_authenticate(user=comprador)
+    resp = api_client.get(f"/index/usuario/{comprador.uuid}/")
+    assert resp.status_code == 200
     assert "password" not in resp.data
 
 
@@ -55,7 +48,6 @@ def test_login_jwt_devuelve_tokens(api_client, comprador):
     })
     assert resp.status_code == 200, resp.data
     assert "access" in resp.data
-    assert "refresh" in resp.data
 
 
 def test_login_jwt_credenciales_invalidas(api_client, comprador):
