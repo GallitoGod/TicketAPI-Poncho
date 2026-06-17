@@ -1,5 +1,3 @@
-from apps.core.permissions import EsProductor_SoporteOrReadOnly
-from types import SimpleNamespace
 import pytest
 
 """
@@ -22,7 +20,7 @@ directamente voy a buscar los errores forbiden. (Solucion criolla)
 
 #   La lectura esta permitida para todos
 @pytest.mark.django_db
-def test_get_permitido_para_anonimo(api_client):
+def test_anonimo_ver_permitido(api_client):
     resp = api_client.get('/index/evento/')
     assert resp.status_code == 200
 
@@ -30,7 +28,7 @@ def test_get_permitido_para_anonimo(api_client):
 
 #   La escritura depende del rol
 @pytest.mark.django_db
-def test_post_anonimo_denegado(api_client):
+def test_anonimo_creacion_evento_denegado(api_client):
     resp = api_client.post("/index/evento/", {
         "nombre": "Recital", 
         "descripcion": "d", 
@@ -42,7 +40,7 @@ def test_post_anonimo_denegado(api_client):
     assert resp.status_code == 403
 
 @pytest.mark.django_db
-def test_post_comprador_denegado(api_client, comprador):
+def test_comprador_creacoion_evento_denegado(api_client, comprador):
     api_client.force_authenticate(comprador)
     resp = api_client.post('/index/evento/', {
         "nombre": "Recital", 
@@ -55,7 +53,7 @@ def test_post_comprador_denegado(api_client, comprador):
     assert resp.status_code == 403
 
 @pytest.mark.django_db
-def test_post_productor_permitido(api_client, productor):
+def test_productor_creacion_evento_permitido(api_client, productor):
     api_client.force_authenticate(productor)
     resp = api_client.post('/index/evento/', {
         "nombre": "Recital", 
@@ -69,7 +67,52 @@ def test_post_productor_permitido(api_client, productor):
 
 
 @pytest.mark.django_db
-def test_delete_soporte_permitido(api_client, soporte, evento):
+def test_soporte_borra_evento_permitido(api_client, soporte, evento):
     api_client.force_authenticate(soporte)
     resp = api_client.delete(f'/index/evento/{evento.uuid}/')
     assert resp.status_code == 204
+
+
+@pytest.mark.django_db
+def test_productor_borra_evento_permitido(api_client, productor, evento):
+    api_client.force_authenticate(user=productor)
+    resp = api_client.delete(f"/index/evento/{evento.uuid}/")
+    assert resp.status_code == 204
+
+
+@pytest.mark.django_db
+def test_productor_edita_evento_permitido(api_client, productor, evento):
+    api_client.force_authenticate(user=productor)
+    resp = api_client.patch(f"/index/evento/{evento.uuid}/", {
+        "nombre": "Conter a las 20:00"
+    })
+    assert resp.status_code == 200
+
+
+@pytest.mark.django_db
+def test_comprador_no_puede_editar_evento(api_client, comprador, evento):
+    api_client.force_authenticate(user=comprador)
+    resp = api_client.patch(f"/index/evento/{evento.uuid}/", {
+        "nombre": "Conter a las 20:00"
+    })
+    assert resp.status_code == 403
+
+@pytest.mark.django_db
+def test_comprador_no_puede_borrar_evento(api_client, comprador, evento):
+    api_client.force_authenticate(user=comprador)
+    resp = api_client.delete(f"/index/evento/{evento.uuid}/")
+    assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_comprador_no_puede_crear_evento(api_client, comprador):
+    api_client.force_authenticate(user=comprador)
+    resp = api_client.post("/index/evento/", {
+        "nombre": "Recital", 
+        "descripcion": "d", 
+        "artista_principal": "Luck Ra",
+        "preventa": "2030-01-01", 
+        "fecha": "2030-02-01", 
+        "lugar": "Catamarca",
+    })
+    assert resp.status_code == 403  # forbiden, te fuiste testeado pa

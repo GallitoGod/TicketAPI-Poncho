@@ -19,15 +19,15 @@ Coeficientes esperados (segun la formula del codigo):
 def test_coef_popularidad_dentro_de_rango(motor):   # 'motor' viene del fixture
     # Para cualquier cantidad de reproducciones: [1, 2].
     # en los extremos el sigmoide satura a 1.0 / 2.0
-    for repros in [0, 1_000, 1_000_000, 5_000_000_000]:
+    for repros in [0, 1000, 1000000, 5000000000]:
         c = motor.coef_popularidad(repros)
         assert 1.0 <= c <= 2.0
 
 
 def test_coef_popularidad_crece_con_reproducciones(motor):
     # Un artista mas escuchado debe ser mas caro que uno chico.
-    poco = motor.coef_popularidad(10_000)
-    mucho = motor.coef_popularidad(5_000_000_000)
+    poco = motor.coef_popularidad(10000)
+    mucho = motor.coef_popularidad(5000000000)
     assert mucho > poco
 
 
