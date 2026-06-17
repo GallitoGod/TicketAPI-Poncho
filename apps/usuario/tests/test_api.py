@@ -12,13 +12,9 @@ Que se testea aca:
 pytestmark = pytest.mark.django_db
 
 
-USUARIO_URL = "/index/usuario/"
-TOKEN_URL = "/api/token/"
-
-
 def test_crear_usuario_requiere_autenticacion(api_client):
     # un anonimo no puede dar de alta usuarios.
-    resp = api_client.post(USUARIO_URL, {
+    resp = api_client.post("/index/usuario/", {
         "username": "Chocolate_cheap_charly",
         "email": "ChocoCharly@gmail.com",
         "password": "pass1234",
@@ -28,7 +24,7 @@ def test_crear_usuario_requiere_autenticacion(api_client):
 
 def test_crear_usuario_ok(api_client, soporte):
     api_client.force_authenticate(user=soporte)
-    resp = api_client.post(USUARIO_URL, {
+    resp = api_client.post("/index/usuario/", {
         "username": "Chocolate_cheap_charly",
         "email": "ChocoCharly@gmail.com",
         "password": "pass1234",
@@ -42,7 +38,7 @@ def test_crear_usuario_ok(api_client, soporte):
 def test_crear_usuario_no_devuelve_password(api_client, soporte):
     # password es write_only, no tiene que aparecer en la respuesta.
     api_client.force_authenticate(user=soporte)
-    resp = api_client.post(USUARIO_URL, {
+    resp = api_client.post("/index/usuario/", {
         "username": "El_Toto",
         "email": "gmailDelToto@gmail.com",
         "password": "pass1234",
@@ -53,7 +49,7 @@ def test_crear_usuario_no_devuelve_password(api_client, soporte):
 
 def test_login_jwt_devuelve_tokens(api_client, comprador):
     # el fixture crea el usuario con password "pass1234"
-    resp = api_client.post(TOKEN_URL, {
+    resp = api_client.post("/api/token/", {
         "username": "comprador1",
         "password": "pass1234",
     })
@@ -63,7 +59,7 @@ def test_login_jwt_devuelve_tokens(api_client, comprador):
 
 
 def test_login_jwt_credenciales_invalidas(api_client, comprador):
-    resp = api_client.post(TOKEN_URL, {
+    resp = api_client.post("/api/token/", {
         "username": "comprador1",
         "password": "contraseñaMal",
     })
